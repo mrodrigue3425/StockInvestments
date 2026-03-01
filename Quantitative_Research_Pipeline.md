@@ -45,6 +45,7 @@ First, we design a **data schema** and retrieval plan for the relevant datasets:
 This is manageable with pandas in memory (millions of rows), but careful design helps. We can store data in **normalized tables** (as above) or use a local SQL database if needed. **Unique IDs** (transaction_id, trade_id) will help track events, and we can create an **event table** that merges key info from trades with price data for analysis.
 
 **Illustrative Code -- Data Ingestion & Schema Setup (Pandas):**
+
 ```python
 import pandas as pd
 
@@ -92,7 +93,7 @@ event_prices = pd.merge(congress_trades, prices,
                         how="left")
 ```
 
-*(The above is a simplified illustration; in practice, we would need to parse raw data formats, handle multiple trades per filing, etc.)*
+Note: The above is a simplified illustration; in practice, we would need to parse raw data formats, handle multiple trades per filing, etc.
 
 ### Data Preprocessing & Cleaning
 
@@ -185,6 +186,7 @@ each event:
 - **Multi-factor models:** Similarly, we could use Fama-French factors for expected return[^27] (more complex, requiring factor data and regression per stock). For initial analysis, a simple market adjustment may suffice, given our short horizons.
 
 **Illustrative Code -- Computing Cumulative Abnormal Returns:**
+
 ```python
 # Assume we have DataFrames: events (with 'ticker' and 'disclosure_date'),
 # prices (with 'date', 'ticker', 'ret', 'mkt_ret' columns for stock and market returns)
@@ -242,6 +244,7 @@ events['CAR_10d'] = CAR10_list
 # Now 'events' has two new columns with 5-day and 10-day
 # post-disclosure abnormal returns for each trade event.
 ```
+
 *(This pseudocode assumes* events *is a DataFrame of event records and that we have a separate DataFrame* prices *with daily returns for each ticker. In practice, one might vectorize this or use SQL/window functions for efficiency, but the loop is shown for clarity.)*
 
 **Quality Check:** We should verify that the distribution of CARs looks reasonable and check for any biases:
@@ -264,10 +267,10 @@ events['CAR_10d'] = CAR10_list
 
 Beyond the simple average effects, we will engineer a rich set of features to feed into regression and machine learning models. These features capture various dimensions of the event's characteristics, the entities involved, and market context. **The table below summarizes key feature ideas** for both congressional and insider trading events, along with the intuition for each:
 
-**Table 2. Candidate Features for Predictive Modeling**
+## Table 2. Candidate Features for Predictive Modeling
 
 | Feature | Description / Rationale |
-|----------|--------------------------|
+| ---------- | -------------------------- |
 | Trade Type (buy vs. sell) | Indicator for a purchase vs. sale. *Insider buys are generally more **informative** than sells, which may be for diversification or taxes*[^31]*. Political "negative" trades (e.g. short-selling or selling stock) have been associated with future stock drops*[^32]*, whereas routine long purchases show little effect on average.* |
 | Trade Size / Volume % | Size of the trade (shares or dollar value) relative to the stock's typical **average daily volume (ADV)** or market cap. *Large trades (especially buys) that are a high percentage of daily volume or insider's ownership may signal higher conviction or material non-public info.* |
 | Reporting Lag (days) | Days between **trade date** and **disclosure date**. *Shorter lags might indicate timely compliance, whereas longer lags (especially beyond the legal deadline) might indicate an attempt to hide especially informed trades*[^33]*. Late filings by insiders have been shown to yield unusually high returns, suggesting opportunistic trades*[^34]*.* We may flag or exclude extremely late reports. |
@@ -283,6 +286,7 @@ Beyond the simple average effects, we will engineer a rich set of features to fe
 *Feature data notes:* Many of these features can be derived from our core datasets. For instance, **trade size vs. ADV** can be computed by taking the shares traded in an insider trade and dividing by the stock's average daily volume over a prior window (say 20 days) from the prices data. **Committee-sector relevance** for Congress trades can be determined by mapping the company's industry sector (from a freely available source like Yahoo Finance or FINRA sector classifications) and checking if it matches the politician's committee domain (we'd maintain a mapping of committees to industries; e g., Financial Services Committee ↔ Banking sector). **Multiple insider trades** can be computed by counting the number of distinct insiders trading the same stock within, say, a 5-day window of the event (excluding the event insider themselves, or including them for multiple trades by the same insider). We will also engineer any needed transforms (e.g., winsorize or cap extreme values of features like size or volatility to reduce the influence of outliers).
 
 **Illustrative Code -- Feature Engineering Examples:**
+
 ```python
 # Example: add a feature for trade size as a fraction of avg daily volume (ADV) over prior 20 days
 
@@ -337,6 +341,7 @@ congress_trades['committee_sector_match'] = congress_trades.apply(
                          for sectors in committee_to_sector.get(row['committee'], [])) else 0,
     axis=1)
 ```
+
 *(The above code is for illustration; in practice, obtaining sectors would require a lookup, e.g., using a free API or mapping file for ticker-to-sector. Also,* pd.merge_asof *is used to align the nearest prior volume data to the trade date for computing size vs ADV.)*
 
 **Responsible Data Usage:** Throughout, we must remember that these features and signals, even if statistically significant, **do not guarantee real-world trading profits**. We will explicitly account for practical considerations:
@@ -411,7 +416,8 @@ We might find, for instance, that *on average, Congress buy disclosures do not s
 
   *Here \(CAR_{i,[1,10]}\) is the 10-day post-event CAR for event* \(i\), *and the X variables are features (InsiderCEO = 1 if a CEO trade, TradeSize% = trade size relative to volume or market cap, etc.). We can include a variety of features to see what drives CAR. Significant \(\beta\) estimates (t-statistics) will tell us which features have predictive power. We can run these regressions using OLS with robust standard errors (to account for heteroskedasticity or clustering by date/company as needed).*
 
-**Illustrative Code -- Cross-Sectional Regression (using**vstatsmodels**):**
+**Illustrative Code -- Cross-Sectional Regression (using vstatsmodels):**
+
 ```python 
 import statsmodels.api as sm
 
@@ -433,6 +439,7 @@ print(model.summary())
 
 # This will show coefficients, t-stats, and p-values for each feature.
 ```
+
 - Consider a **panel regression or Fama--MacBeth approach** to control for time effects:
 
   - A **Fama--MacBeth regression** involves running a cross-sectional regression for each period (e.g., each month or each day's events) and then averaging the coefficients across periods, assessing their statistical significance. This can account for time-variation in relationships.
@@ -534,7 +541,9 @@ auc = roc_auc_score(y_test, test_proba)
 print(f"Test AUC: {auc:.3f}")
 ```
 
-*(The code above demonstrates a train/validation/test split by date and training of an XGBoost model with early stopping on the validation set. In practice, we might refine this approach with cross-validation and more detailed hyperparameter tuning.)*
+#### Note
+
+The code above demonstrates a train/validation/test split by date and training of an XGBoost model with early stopping on the validation set. In practice, we might refine this approach with cross-validation and more detailed hyperparameter tuning.
 
 **Defining a Signal Score:** Once a model is trained (or even from a simpler method), we need to define a *signal* that can be used in a backtest:
 
@@ -684,6 +693,7 @@ for current_date in trading_calendar:
 
     portfolio_values.append({'date': current_date, 'equity': portfolio_value})
 ```
+
 *(This high-level pseudocode outlines a daily loop. In practice, you might vectorize this or use event-time indexing. Note:* get_price(ticker, date) *is a placeholder for retrieving price; in practice, we'd index into a price DataFrame or dictionary. The logic updates* equity *as positions are closed and tracks the portfolio's value over time in* portfolio_values*.)*
 
 ### 5.2 Performance Evaluation Metrics
@@ -788,7 +798,7 @@ By following this structured approach, we ensure that our analysis is thorough, 
 
 [^10]: <http://arc.hhs.se/download.aspx?MediumId=6365>
 
-[^11]: <https://www.hbs.edu/faculty/Shared%20Documents/conferences/2023-IMO/Session8-late_filings.pdf>
+[^11]: <https://www.hbs.edu/faculty/Shared%20Documents/conferences/2023-IMO Session8-late_filings.pdf>
 
 [^12]: <http://arc.hhs.se/download.aspx?MediumId=6365>
 
