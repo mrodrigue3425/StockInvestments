@@ -158,17 +158,13 @@ each event:
 
 - The **Abnormal Return (AR)** for stock *i* on day *t* is then:
 
-  $$
-  AR_{i,t} = R_{i,t} - R_{\text{bench},t},
-  $$
+  $AR_{i,t} = R_{i,t} - R_{\text{bench},t},$
 
   i.e. the stock's excess return over the market/benchmark[^24]. This assumes market efficiency under the *null hypothesis* — any truly new information should result in *excess* performance.
 
 - A **Cumulative Abnormal Return (CAR)** over a window \([a,b]\) (with *a* and *b* in trading days relative to disclosure) is the sum of ARs over that window:
 
-  $$
-  CAR_i[a,b] = \sum_{t=a}^{b} AR_{i,t}.
-  $$
+  $CAR_i[a,b] = \sum_{t=a}^{b} AR_{i,t}.$
 
   For example, \(CAR_i[+1,+5]\) is the total abnormal return from the first trading day after disclosure through the fifth day after.
 
@@ -178,11 +174,17 @@ each event:
 
 - **Market model:** Estimate a regression for each stock *i* over the *estimation window* (e.g. \([-120, -20]\)) to predict its normal relationship with the market (and possibly other factors). For example, estimate via OLS:
 
-  $$
-  R_{i,t} = \alpha_i + \beta_i \cdot R_{\text{S\&P500},t} + \epsilon_{i,t}
-  $$
+  $R_{i,t} = \alpha_i + \beta_i \cdot R_{\text{S\&P500},t} + \epsilon_{i,t}$
 
-  Using returns prior to the event. Then compute \(\hat{R}_{i,t} = \hat{\alpha}_i + \hat{\beta}_i \cdot R_{\text{S&P500},t}\) as the expected return on each event-day *t*, and define \(AR_{i,t} = R_{i,t} - \hat{R}_{i,t}\)[^25][^26]. This controls for the stock's typical market beta.
+Using returns prior to the event, we estimate:
+
+$\hat{R}_{i,t} = \hat{\alpha}_i + \hat{\beta}_i \cdot R_{\text{S\&P500},t}$
+
+as the expected return on each event-day *t*, and define:
+
+$AR_{i,t} = R_{i,t} - \hat{R}_{i,t}$[^25] [^26].
+
+This controls for the stock's typical market beta.
 
 - **Multi-factor models:** Similarly, we could use Fama-French factors for expected return[^27] (more complex, requiring factor data and regression per stock). For initial analysis, a simple market adjustment may suffice, given our short horizons.
 
