@@ -33,6 +33,7 @@ First, we design a **data schema** and retrieval plan for the relevant datasets:
 -   **Insider trades:** Use the SEC's **EDGAR** system. The SEC provides \[bulk download files of Form 4 data from 2006 onward\][^9] in CSV form (updated quarterly). We can download these or use an API like *SEC-API* or libraries (e.g., sec-edgar-downloader) to collect Form 4 filings.
 
 -   **Price & Reference data:** Use Yahoo Finance (via yfinance in Python) or similar free APIs to get daily prices for each ticker in our trade lists, plus indices (S&P 500 for market, sector ETFs or Fama-French factors for risk adjustment).
+-   **TICKER LISTINGS** Use the SEC’s CIK (Central Index Key) as a stable and unique identifier across time. By downloading the official JSON mapping file from the SEC [^65] and matching it to the tickers we intend to analyse, we can retrieve the corresponding CIKs and build a consistent company-level identifier system. This allows us to map historical ticker changes (e.g., FB → META) to a single entity. Using the current ticker associated with each CIK, we can then pull historical price data from Yahoo Finance and merge it at the company level. Since Yahoo Finance typically adjusts for stock splits, dividends, and corporate actions, this approach enables us to construct a consistent and comprehensive historical price dataset even for firms that have experienced ticker changes over time.
 
 **Data Volume & Storage:** Expect on the order of **tens of thousands of trades**:
 
@@ -905,3 +906,6 @@ By following this structured approach, we ensure that our analysis is thorough, 
 [^63]: <http://arc.hhs.se/download.aspx?MediumId=6365>
 
 [^64]: <https://corpgov.law.harvard.edu/2024/07/29/negative-trading-in-congress/>
+
+[^65] https://www.sec.gov/file/company-tickers
+
