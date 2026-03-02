@@ -148,9 +148,9 @@ each event:
 **Return Calculation:** We will compute daily stock returns and *abnormal returns (AR)* for each event:
 - Let \(R_{i,t}\) be the **return** of stock *i* on day *t* (we can use log returns for additivity, or simple returns for intuitive percentages; we'll assume simple returns for explanation). We'll compute daily returns from adjusted prices as:
 
-  \[
+  $$
   R_{i,t} = \frac{P_{i,t} - P_{i,t-1}}{P_{i,t-1}},
-  \]
+  $$
 
   where \(P_{i,t}\) is the adjusted closing price on day *t*.
 
@@ -158,29 +158,29 @@ each event:
 
 - The **Abnormal Return (AR)** for stock *i* on day *t* is then:
 
-  \[
+  $$
   AR_{i,t} = R_{i,t} - R_{\text{bench},t},
-  \]
+  $$
 
   i.e. the stock's excess return over the market/benchmark[^24]. This assumes market efficiency under the *null hypothesis* — any truly new information should result in *excess* performance.
 
 - A **Cumulative Abnormal Return (CAR)** over a window \([a,b]\) (with *a* and *b* in trading days relative to disclosure) is the sum of ARs over that window:
 
-  \[
+  $$
   CAR_i[a,b] = \sum_{t=a}^{b} AR_{i,t}.
-  \]
+  $$
 
   For example, \(CAR_i[+1,+5]\) is the total abnormal return from the first trading day after disclosure through the fifth day after.
 
 **Expected Return Models:** For robustness, we can compute AR using different expected return benchmarks:
 
-- **Market-adjusted:** \(AR_{i,t} = R_{i,t} - R_{\text{S&P500},t}\). Simple and doesn't require an estimation window.
+- **Market-adjusted:** ($AR_{i,t} = R_{i,t} - R_{\text{S\&P500},t}$). Simple and doesn't require an estimation window.
 
 - **Market model:** Estimate a regression for each stock *i* over the *estimation window* (e.g. \([-120, -20]\)) to predict its normal relationship with the market (and possibly other factors). For example, estimate via OLS:
 
-  \[
-  R_{i,t} = \alpha_i + \beta_i \cdot R_{\text{S&P500},t} + \epsilon_{i,t}
-  \]
+  $$
+  R_{i,t} = \alpha_i + \beta_i \cdot R_{\text{S\&P500},t} + \epsilon_{i,t}
+  $$
 
   Using returns prior to the event. Then compute \(\hat{R}_{i,t} = \hat{\alpha}_i + \hat{\beta}_i \cdot R_{\text{S&P500},t}\) as the expected return on each event-day *t*, and define \(AR_{i,t} = R_{i,t} - \hat{R}_{i,t}\)[^25][^26]. This controls for the stock's typical market beta.
 
