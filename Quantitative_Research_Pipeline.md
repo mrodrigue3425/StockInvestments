@@ -170,11 +170,11 @@ each event:
 
 **Expected Return Models:** For robustness, we can compute AR using different expected return benchmarks:
 
-- **Market-adjusted:** ($AR_{i,t} = R_{i,t} - R_{\text{S\&P500},t}$). Simple and doesn't require an estimation window.
+- **Market-adjusted:** ( $AR_{i,t} = R_{i,t} - R_{\text{S\&P500},t}$ ). Simple and doesn't require an estimation window.
 
 - **Market model:** Estimate a regression for each stock *i* over the *estimation window* (e.g. \([-120, -20]\)) to predict its normal relationship with the market (and possibly other factors). For example, estimate via OLS:
 
-  $R_{i,t} = \alpha_i + \beta_i \cdot R_{\text{S\&P500},t} + \epsilon_{i,t}$
+$R_{i,t} = \alpha_i + \beta_i \cdot R_{\text{S\&P500},t} + \epsilon_{i,t}$
 
 Using returns prior to the event, we estimate:
 
@@ -182,7 +182,7 @@ $\hat{R}_{i,t} = \hat{\alpha}_i + \hat{\beta}_i \cdot R_{\text{S\&P500},t}$
 
 as the expected return on each event-day *t*, and define:
 
-$AR_{i,t} = R_{i,t} - \hat{R}_{i,t}$[^25] [^26].
+$AR_{i,t} = R_{i,t} - \hat{R}_{i,t}$ [^25] [^26].
 
 This controls for the stock's typical market beta.
 
