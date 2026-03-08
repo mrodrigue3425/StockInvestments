@@ -909,5 +909,7 @@ By following this structured approach, we ensure that our analysis is thorough, 
 
 [^64]: <https://corpgov.law.harvard.edu/2024/07/29/negative-trading-in-congress/>
 
-[^65] https://www.sec.gov/file/company-tickers
+[^65] https://www.sec.gov/file/company-tickers // https://www.sec.gov/file/company-tickers-exchange
+
+
 
