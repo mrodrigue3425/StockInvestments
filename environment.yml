@@ -1,6 +1,11 @@
-name: notebook
+name: insider
 channels:
+  - conda-forge
   - defaults
 dependencies:
-  - python=3.11
-prefix: /home/mique/miniconda3/envs/notebook
+  - python=3.11.14
+  - ipykernel
+  - polars
+  - pyarrow
+  - pexpect
+prefix: /Users/alexdomingo/miniforge3/envs/insider
