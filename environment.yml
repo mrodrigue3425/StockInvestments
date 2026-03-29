@@ -1,0 +1,6 @@
+name: notebook
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+prefix: /home/mique/miniconda3/envs/notebook
